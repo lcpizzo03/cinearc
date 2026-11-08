@@ -1,26 +1,126 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a100c;
+  --foreground: #e9e1cf;
+
+  --forest-950: #070d09;
+  --forest-900: #0a100c;
+  --forest-800: #101a13;
+  --forest-700: #17251b;
+  --forest-600: #243528;
+
+  --ochre-500: #a88952;
+  --ochre-400: #c6a967;
+
+  --bordeaux-500: #6f2528;
+  --bordeaux-400: #8b3535;
+
+  --paper: #e9e1cf;
+  --muted: #9b9a88;
+  --muted-dark: #6f756b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-forest-950: var(--forest-950);
+  --color-forest-900: var(--forest-900);
+  --color-forest-800: var(--forest-800);
+  --color-forest-700: var(--forest-700);
+  --color-forest-600: var(--forest-600);
+
+  --color-ochre-500: var(--ochre-500);
+  --color-ochre-400: var(--ochre-400);
+
+  --color-bordeaux-500: var(--bordeaux-500);
+  --color-bordeaux-400: var(--bordeaux-400);
+
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-muted-dark: var(--muted-dark);
+
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --font-display: Georgia, "Times New Roman", serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
+
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: var(--ochre-400);
+  color: var(--forest-950);
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--forest-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--forest-600);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ochre-500);
+}
+
+
+
+.font-display {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.font-mono {
+  font-family: "DM Mono", "Courier New", monospace;
+}
+
+.cinearc-noise {
+  position: relative;
+}
+
+.cinearc-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+.stamp-mark {
+  filter: drop-shadow(0 0 0.5px rgba(162, 55, 47, 0.4));
 }

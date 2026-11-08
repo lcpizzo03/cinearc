@@ -1,0 +1,213 @@
+"use client";
+
+import { useState, Suspense } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    const result = await signIn("credentials", {
+      identifier,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Credenziali non valide. Verifica username e password.");
+      setIsLoading(false);
+    } else {
+      router.push(callbackUrl);
+      router.refresh();
+    }
+  };
+
+  return (
+    <main className="cinearc-noise relative min-h-screen overflow-hidden bg-forest-950 text-paper">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-px w-[80%] -translate-x-1/2 bg-ochre-400/20" />
+
+        <div className="absolute left-[8%] top-[18%] h-[55%] w-px bg-paper/[0.06]" />
+
+        <div className="absolute right-[8%] top-[18%] h-[55%] w-px bg-paper/[0.06]" />
+
+        <div className="absolute bottom-[12%] left-1/2 h-px w-[84%] -translate-x-1/2 bg-paper/[0.06]" />
+      </div>
+
+      <div className="relative mx-auto flex min-h-screen max-w-[1600px] items-center px-6 py-28 md:px-10">
+        <div className="grid w-full items-center gap-16 lg:grid-cols-[1fr_480px] lg:gap-24">
+          <section className="hidden lg:block">
+            <div className="mb-8 flex items-center gap-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ochre-400">
+                CineArc
+              </span>
+
+              <span className="h-px w-16 bg-ochre-400/40" />
+
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper/35">
+                Accesso all'archivio
+              </span>
+            </div>
+
+            <h1 className="max-w-3xl font-display text-6xl leading-[0.94] text-paper xl:text-8xl">
+              Entra nell'
+              <br />
+              Archivio
+            </h1>
+
+            <p className="mt-10 max-w-xl text-sm leading-7 text-paper/55">
+              Accedi all'archivio digitale di CineArc per consultare
+              documenti, fonti e testimonianze sulla censura cinematografica
+              e sulle controversie che hanno attraversato il cinema del
+              Novecento.
+            </p>
+
+            <div className="mt-14 flex items-center gap-5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper/30">
+                Archivio digitale
+              </span>
+
+              <span className="h-px w-20 bg-paper/10" />
+
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper/30">
+                Consultazione
+              </span>
+            </div>
+          </section>
+
+          <section className="w-full">
+            <div className="border border-paper/10 bg-forest-800/70">
+              <div className="border-b border-paper/10 px-7 py-6 md:px-9">
+                <div className="flex items-start justify-between gap-6">
+                  <div>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-ochre-400">
+                      Accesso
+                    </span>
+
+                    <h2 className="mt-3 font-display text-3xl text-paper md:text-4xl">
+                      Identificazione
+                    </h2>
+                  </div>
+
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-paper/25">
+                    CA / 01
+                  </span>
+                </div>
+              </div>
+
+              <div className="px-7 py-8 md:px-9 md:py-10">
+                {error && (
+                  <div className="mb-7 border border-red-900/50 bg-red-950/20 px-4 py-3">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-red-300">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-7">
+                  <div>
+                    <label
+                      htmlFor="identifier"
+                      className="mb-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50"
+                    >
+                      Email o Username
+                    </label>
+
+                    <input
+                      id="identifier"
+                      type="text"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      autoComplete="username"
+                      className="w-full border-b border-paper/20 bg-transparent px-0 py-3 text-sm text-paper outline-none transition-colors placeholder:text-paper/20 focus:border-ochre-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      placeholder="Inserisci le tue credenziali"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className="mb-3 block font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50"
+                    >
+                      Password
+                    </label>
+
+                    <input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      autoComplete="current-password"
+                      className="w-full border-b border-paper/20 bg-transparent px-0 py-3 text-sm text-paper outline-none transition-colors placeholder:text-paper/20 focus:border-ochre-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      placeholder="Inserisci la password"
+                    />
+                  </div>
+
+                  <div className="pt-3">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="group flex w-full items-center justify-between border border-ochre-400/50 px-5 py-4 text-paper transition-all hover:border-ochre-400 hover:bg-ochre-400 hover:text-forest-950 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span className="font-mono text-[10px] uppercase tracking-[0.2em]">
+                        {isLoading ? "Accesso in corso..." : "Entra nell'archivio"}
+                      </span>
+
+                      <span className="text-lg transition-transform group-hover:translate-x-1">
+                        →
+                      </span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div className="border-t border-paper/10 px-7 py-5 md:px-9">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-paper/25">
+                    Accesso riservato
+                  </span>
+
+                  <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-paper/25">
+                    CineArc
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-forest-950 text-paper">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ochre-400">
+            Caricamento...
+          </span>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}

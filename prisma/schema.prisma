@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model archivio {
+  id        Int         @id @default(autoincrement())
+  arc       String      @unique @db.VarChar(100)
+  documenti documenti[]
+}
+
+model collocamento {
+  id        Int         @id @default(autoincrement())
+  nome      String      @unique @db.VarChar(255)
+  documenti documenti[]
+}
+
+model db_sorgenti {
+  id              Int         @id @default(autoincrement())
+  nome_db_origine String      @unique @db.VarChar(100)
+  descrizione     String?     @db.VarChar(255)
+  documenti       documenti[]
+}
+
+model doc_chiavi {
+  documento_id  Int
+  chiave_id     Int
+  parole_chiave parole_chiave @relation(fields: [chiave_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  documenti     documenti     @relation(fields: [documento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([documento_id, chiave_id])
+}
+
+model doc_collegamenti {
+  documento_id                                                 Int
+  documento_collegato_id                                       Int
+  documenti_doc_collegamenti_documento_collegato_idTodocumenti documenti @relation("doc_collegamenti_documento_collegato_idTodocumenti", fields: [documento_collegato_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  documenti_doc_collegamenti_documento_idTodocumenti           documenti @relation("doc_collegamenti_documento_idTodocumenti", fields: [documento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([documento_id, documento_collegato_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model documenti {
+  id                                                                  Int                 @id @default(autoincrement())
+  db_sorgente                                                         Int
+  progressivo                                                         Int                 @default(0)
+  archivio_id                                                         Int
+  collocamento_id                                                     Int
+  testata_id                                                          Int?
+  tipologia_id                                                        Int
+  numero                                                              Int?
+  gg                                                                  Int?
+  mm                                                                  Int?
+  aa                                                                  Int?
+  annata                                                              String?             @db.VarChar(50)
+  pagina                                                              Int?
+  titolo                                                              String?             @db.VarChar(255)
+  autore                                                              String              @default("") @db.VarChar(255)
+  destinatario                                                        String              @default("") @db.VarChar(255)
+  online                                                              Int                 @default(1) @db.SmallInt
+  times                                                               DateTime            @default(now()) @db.Timestamp(6)
+  ocs                                                                 String?
+  consultazioni                                                       consultazioni[]
+  doc_chiavi                                                          doc_chiavi[]
+  doc_collegamenti_doc_collegamenti_documento_collegato_idTodocumenti doc_collegamenti[]  @relation("doc_collegamenti_documento_collegato_idTodocumenti")
+  doc_collegamenti_doc_collegamenti_documento_idTodocumenti           doc_collegamenti[]  @relation("doc_collegamenti_documento_idTodocumenti")
+  archivio                                                            archivio            @relation(fields: [archivio_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  collocamento                                                        collocamento        @relation(fields: [collocamento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  db_sorgenti                                                         db_sorgenti         @relation(fields: [db_sorgente], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  testata                                                             testata?            @relation(fields: [testata_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipologie_documento                                                 tipologie_documento @relation(fields: [tipologia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([archivio_id], map: "idx_documenti_archivio")
+  @@index([aa, mm, gg], map: "idx_documenti_data")
+  @@index([db_sorgente], map: "idx_documenti_db_sorgente")
+  @@index([testata_id], map: "idx_documenti_testata")
+  @@index([tipologia_id], map: "idx_documenti_tipologia")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model parole_chiave {
+  id         Int          @id @default(autoincrement())
+  nome       String       @unique @db.VarChar(200)
+  categoria  String       @default("primaria") @db.VarChar(50)
+  doc_chiavi doc_chiavi[]
+
+  @@index([categoria], map: "idx_pk_categoria")
+}
+
+model testata {
+  id        Int         @id @default(autoincrement())
+  nome      String      @unique @db.VarChar(200)
+  documenti documenti[]
+}
+
+model tipologie_documento {
+  id        Int         @id @default(autoincrement())
+  nome      String      @unique @db.VarChar(100)
+  documenti documenti[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model utenti {
+  id            Int             @id(map: "sub_utenti_pkey") @default(autoincrement())
+  username      String          @unique(map: "sub_utenti_username_key") @db.VarChar(50)
+  password      String          @db.VarChar(255)
+  email         String          @unique(map: "sub_utenti_email_key") @db.VarChar(100)
+  ruolo         String          @default("utente") @db.VarChar(50)
+  nome_completo String          @db.VarChar(200)
+  consultazioni consultazioni[]
+}
+
+model consultazioni {
+  utente_id     Int
+  documento_id  Int
+  consultato_il DateTime  @default(now()) @db.Timestamp(6)
+  documenti     documenti @relation(fields: [documento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  utenti        utenti    @relation(fields: [utente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([utente_id, documento_id])
+  @@index([utente_id, consultato_il(sort: Desc)], map: "idx_consultazioni_utente_data")
+}
